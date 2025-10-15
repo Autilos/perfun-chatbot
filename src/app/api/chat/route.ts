@@ -4,15 +4,25 @@ export async function POST(request: NextRequest) {
   try {
     const { message, conversationId, userId } = await request.json();
 
+    const baseUrl = process.env.DIFY_API_BASE || 'https://api.dify.ai/v1';
+    const apiKey = process.env.DIFY_API_KEY;
+
     console.log('=== API ROUTE DEBUG ===');
-    console.log('API Key:', process.env.DIFY_API_KEY ? 'SET' : 'NOT_SET');
-    console.log('API Base:', process.env.DIFY_API_BASE);
+    console.log('API Key:', apiKey ? 'SET' : 'NOT_SET');
+    console.log('API Base:', baseUrl);
     console.log('Message:', message);
 
-    const response = await fetch(`${process.env.DIFY_API_BASE}/chat-messages`, {
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'DIFY_API_KEY is missing. Set it in your environment.' },
+        { status: 500 }
+      );
+    }
+
+    const response = await fetch(`${baseUrl}/chat-messages`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.DIFY_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
